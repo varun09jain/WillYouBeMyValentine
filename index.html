@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Be My Valentine 💘</title>
+  <title>Be My Valentine 💖</title>
   <style>
     body {
       display: flex;
@@ -12,6 +12,7 @@
       font-family: "Comic Sans MS", Arial, sans-serif;
       background: #ffe6ea;
       text-align: center;
+      overflow: hidden;
     }
 
     h1 {
@@ -20,14 +21,14 @@
 
     #message {
       font-size: 18px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       min-height: 24px;
     }
 
-    img {
+    #cute-gif img {
       width: 220px;
-      margin-bottom: 20px;
       border-radius: 12px;
+      margin-bottom: 20px;
     }
 
     .buttons {
@@ -54,22 +55,37 @@
       background: #ccc;
       left: 160px;
     }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
+
 <body>
 
-<h1>Will you be my Valentine? 💖</h1>
+  <h1>Will you be my Valentine? 💘</h1>
 
-<div id="message">Go on… think carefully 😌</div>
+  <div id="message">Go on… think carefully 😌</div>
 
-<img src="https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif" alt="cute gif">
+  <div id="cute-gif">
+    <img
+      src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzRrdnk4cmpxaDZkdXVheXBhcTd3eHh1dTNsczEwamN5eGEwZmFxOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/1NjbFp5CxPYSNFoRce/giphy.gif"
+      alt="cute valentine gif">
+  </div>
 
-<div class="buttons">
-  <button id="yes" onclick="yesClicked()">Yes ❤️</button>
-  <button id="no">No 🙈</button>
-</div>
+  <div class="buttons">
+    <button id="yes" onclick="yesClicked()">Yes ❤️</button>
+    <button id="no">No 🙈</button>
+  </div>
+
+  <canvas id="confetti"></canvas>
 
 <script>
+  /* --------- No button chase logic ---------- */
   const noBtn = document.getElementById("no");
   const message = document.getElementById("message");
 
@@ -87,10 +103,8 @@
   noBtn.addEventListener("mouseover", () => {
     chaseCount++;
 
-    const x = Math.random() * 220;
-    const y = Math.random() * 120;
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+    noBtn.style.left = Math.random() * 220 + "px";
+    noBtn.style.top  = Math.random() * 120 + "px";
 
     if (chaseCount <= messages.length) {
       message.textContent = messages[chaseCount - 1];
@@ -98,16 +112,68 @@
 
     if (chaseCount > 6) {
       noBtn.style.display = "none";
-      message.textContent = "Only one option left 😌💘"
+      message.textContent = "Only one option left 😌💘";
     }
   });
 
+  /* --------- Confetti logic ---------- */
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let confetti = [];
+
+  function launchConfetti() {
+    confetti = [];
+    for (let i = 0; i < 200; i++) {
+      confetti.push({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        r: Math.random() * 6 + 2,
+        dx: (Math.random() - 0.5) * 10,
+        dy: Math.random() * -10,
+        color: `hsl(${Math.random() * 360}, 100%, 60%)`
+      });
+    }
+    animateConfetti();
+  }
+
+  function animateConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    confetti.forEach((c, i) => {
+      c.x += c.dx;
+      c.y += c.dy;
+      c.dy += 0.3;
+
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.fillStyle = c.color;
+      ctx.fill();
+
+      if (c.y > canvas.height) confetti.splice(i, 1);
+    });
+
+    if (confetti.length > 0) {
+      requestAnimationFrame(animateConfetti);
+    }
+  }
+
+  /* --------- YES click ---------- */
   function yesClicked() {
-    document.body.innerHTML = `
-      <h1>YAYYYYY!!! 💖🥰</h1>
-      <img src="https://media.giphy.com/media/l0MYB8Ory7Hqefo9a/giphy.gif" style="width:260px;">
-      <p style="font-size:20px;">Best. Decision. Ever. 😍</p>
-    `;
+    launchConfetti();
+
+    setTimeout(() => {
+      document.body.innerHTML = `
+        <h1>YAYYYYY!!! 💖🥳</h1>
+        <img
+          src="https://media.tenor.com/0AVbKGY_MxMAAAAC/happy-dance.gif"
+          style="width:260px; border-radius:12px; margin-bottom:15px;">
+        <p style="font-size:22px; font-weight:bold;">
+          Order on the Way !! 🚚💝
+        </p>
+      `;
+    }, 800);
   }
 </script>
 
