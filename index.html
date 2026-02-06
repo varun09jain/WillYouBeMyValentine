@@ -1,7 +1,8 @@
 <!DOCTYPE html>
+
 <html>
 <head>
-  <title>Be My Valentine 💖</title>
+  <title>Mere Valentine Banoge? 💖</title>
   <style>
     body {
       display: flex;
@@ -10,171 +11,226 @@
       justify-content: center;
       height: 100vh;
       font-family: "Comic Sans MS", Arial, sans-serif;
-      background: #ffe6ea;
+      background: linear-gradient(135deg, #ffe6ea, #fff5f7);
       text-align: center;
       overflow: hidden;
+      margin: 0;
     }
 
-    h1 {
-      margin-bottom: 10px;
-    }
+```
+h1 {
+  color: #d6336c;
+  margin-bottom: 8px;
+}
 
-    #message {
-      font-size: 18px;
-      margin-bottom: 15px;
-      min-height: 24px;
-    }
+#message {
+  font-size: 18px;
+  margin-bottom: 12px;
+  min-height: 24px;
+  color: #444;
+}
 
-    #cute-gif img {
-      width: 220px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
+#cute-gif img {
+  width: 230px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
 
-    .buttons {
-      position: relative;
-      width: 320px;
-      height: 200px;
-    }
+.buttons {
+  position: relative;
+  width: 320px;
+  height: 160px;
+}
 
-    button {
-      padding: 12px 22px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+button {
+  padding: 12px 22px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  position: absolute;
+}
 
-    #yes {
-      background: #ff4d6d;
-      color: white;
-    }
+button:hover {
+  transform: scale(1.05);
+}
 
-    #no {
-      position: absolute;
-      background: #ccc;
-      left: 160px;
-    }
+/* Proper spacing */
+#yes {
+  background: #ff4d6d;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  left: 40px;
+  top: 50px;
+  z-index: 2;
+}
 
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-    }
+#no {
+  background: #ddd;
+  left: 200px;
+  top: 50px;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.petal {
+  position: fixed;
+  top: -10px;
+  font-size: 20px;
+  animation: fall linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(360deg);
+  }
+}
+```
+
   </style>
 </head>
 
 <body>
 
   <h1>Will you be my Valentine? 💘</h1>
-
-  <div id="message">Go on… think carefully 😌</div>
+  <div id="message">Soch lo… dil se jawab dena 😌</div>
 
   <div id="cute-gif">
-    <img
-      src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzRrdnk4cmpxaDZkdXVheXBhcTd3eHh1dTNsczEwamN5eGEwZmFxOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/1NjbFp5CxPYSNFoRce/giphy.gif"
-      alt="cute valentine gif">
+    <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzRrdnk4cmpxaDZkdXVheXBhcTd3eHh1dTNsczEwamN5eGEwZmFxOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/1NjbFp5CxPYSNFoRce/giphy.gif">
   </div>
 
-  <div class="buttons">
-    <button id="yes" onclick="yesClicked()">Yes ❤️</button>
-    <button id="no">No 🙈</button>
+  <div class="buttons" id="buttonBox">
+    <button id="yes" onclick="yesClicked()">Haan ❤️</button>
+    <button id="no">Nahi 🙈</button>
   </div>
 
-  <canvas id="confetti"></canvas>
+<canvas id="confetti"></canvas>
+
+  <audio id="music" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_7bcb7f6c6c.mp3" type="audio/mpeg">
+  </audio>
 
 <script>
-  /* --------- No button chase logic ---------- */
-  const noBtn = document.getElementById("no");
-  const message = document.getElementById("message");
+/* Floating petals */
+for (let i = 0; i < 25; i++) {
+  const petal = document.createElement("div");
+  petal.className = "petal";
+  petal.innerHTML = "🌸";
+  petal.style.left = Math.random() * window.innerWidth + "px";
+  petal.style.animationDuration = (5 + Math.random() * 5) + "s";
+  document.body.appendChild(petal);
+}
 
-  let chaseCount = 0;
+/* Button logic */
+const noBtn = document.getElementById("no");
+const yesBtn = document.getElementById("yes");
+const box = document.getElementById("buttonBox");
+const message = document.getElementById("message");
 
-  const messages = [
-    "Hey! That was rude 😳",
-    "Why are you running?! 😭",
-    "Come on… just click Yes 🥺",
-    "I’m getting tired… 😵",
-    "OK OK I GET IT 😤",
-    "You literally have no choice now 😏❤️"
-  ];
+let chaseCount = 0;
+let yesScale = 1;
 
-  noBtn.addEventListener("mouseover", () => {
-    chaseCount++;
+const messages = [
+  "Arey… itna bhi kya sochna? 😳",
+  "Dil todoge kya? 😭",
+  "Ek chance toh banta hai 🥺",
+  "Maa ne mana nahi kiya hai 😌",
+  "Sharmao mat… Haan bol do ❤️",
+  "Ab toh destiny bhi Yes keh rahi hai 😏"
+];
 
-    noBtn.style.left = Math.random() * 220 + "px";
-    noBtn.style.top  = Math.random() * 120 + "px";
+noBtn.addEventListener("mouseover", () => {
+  chaseCount++;
 
-    if (chaseCount <= messages.length) {
-      message.textContent = messages[chaseCount - 1];
-    }
+  /* Move 'Nahi' inside the box */
+  const maxX = box.clientWidth - noBtn.offsetWidth;
+  const maxY = box.clientHeight - noBtn.offsetHeight;
 
-    if (chaseCount > 6) {
-      noBtn.style.display = "none";
-      message.textContent = "Only one option left 😌💘";
-    }
+  noBtn.style.left = Math.random() * maxX + "px";
+  noBtn.style.top  = Math.random() * maxY + "px";
+
+  /* Grow YES button */
+  yesScale += 0.15;
+  yesBtn.style.transform = `scale(${yesScale})`;
+
+  if (chaseCount <= messages.length) {
+    message.textContent = messages[chaseCount - 1];
+  }
+
+  if (chaseCount > 6) {
+    noBtn.style.display = "none";
+    message.textContent = "Ab sirf ek hi option hai 😌💘";
+  }
+});
+
+/* Confetti */
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+function launchCelebration() {
+  particles = [];
+  for (let i = 0; i < 250; i++) {
+    particles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      size: Math.random() * 8 + 2,
+      dx: (Math.random() - 0.5) * 10,
+      dy: Math.random() * -12,
+      color: `hsl(${Math.random() * 360},100%,60%)`
+    });
+  }
+  animate();
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach((p, i) => {
+    p.x += p.dx;
+    p.y += p.dy;
+    p.dy += 0.3;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+
+    if (p.y > canvas.height) particles.splice(i, 1);
   });
 
-  /* --------- Confetti logic ---------- */
-  const canvas = document.getElementById("confetti");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  if (particles.length > 0) requestAnimationFrame(animate);
+}
 
-  let confetti = [];
+/* YES click */
+function yesClicked() {
+  document.getElementById("music").play();
+  launchCelebration();
 
-  function launchConfetti() {
-    confetti = [];
-    for (let i = 0; i < 200; i++) {
-      confetti.push({
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        r: Math.random() * 6 + 2,
-        dx: (Math.random() - 0.5) * 10,
-        dy: Math.random() * -10,
-        color: `hsl(${Math.random() * 360}, 100%, 60%)`
-      });
-    }
-    animateConfetti();
-  }
-
-  function animateConfetti() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    confetti.forEach((c, i) => {
-      c.x += c.dx;
-      c.y += c.dy;
-      c.dy += 0.3;
-
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-      ctx.fillStyle = c.color;
-      ctx.fill();
-
-      if (c.y > canvas.height) confetti.splice(i, 1);
-    });
-
-    if (confetti.length > 0) {
-      requestAnimationFrame(animateConfetti);
-    }
-  }
-
-  /* --------- YES click ---------- */
-  function yesClicked() {
-    launchConfetti();
-
-    setTimeout(() => {
-      document.body.innerHTML = `
-        <h1>YAYYYYY!!! 💖🥳</h1>
-        <img
-          src="https://media.tenor.com/0AVbKGY_MxMAAAAC/happy-dance.gif"
-          style="width:260px; border-radius:12px; margin-bottom:15px;">
-        <p style="font-size:22px; font-weight:bold;">
-          Order on the Way !! 🚚💝
-        </p>
-      `;
-    }, 800);
-  }
+  setTimeout(() => {
+    document.body.innerHTML = `
+      <h1>Yayyy! Tumne Haan keh diya! 💖🥳</h1>
+      <img src="https://media.tenor.com/0AVbKGY_MxMAAAAC/happy-dance.gif"
+      style="width:260px; border-radius:12px; margin-bottom:15px;">
+      <p style="font-size:22px; font-weight:bold; color:#d6336c;">
+        Surprise on the way! 🎁🚚
+      </p>
+      <p style="font-size:18px;">
+        Ab official Valentine ho tum ❤️
+      </p>
+    `;
+  }, 900);
+}
 </script>
 
 </body>
